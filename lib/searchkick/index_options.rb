@@ -6,10 +6,12 @@ module Searchkick
       language = language.call if language.respond_to?(:call)
       index_type = options[:_type]
       index_type = index_type.call if index_type.respond_to?(:call)
+      mappings_from_options = options[:mappings]
+      mappings_from_options = mappings_from_options.call if mappings_from_options.respond_to?(:call)
 
-      if options[:mappings] && !options[:merge_mappings]
+      if mappings_from_options && !options[:merge_mappings]
         settings = options[:settings] || {}
-        mappings = options[:mappings]
+        mappings = mappings_from_options
       else
         below60 = Searchkick.server_below?("6.0.0")
         below62 = Searchkick.server_below?("6.2.0")
@@ -414,7 +416,7 @@ module Searchkick
           mappings[index_type][:_all] = all_enabled ? analyzed_field_options : {enabled: false}
         end
 
-        mappings = mappings.symbolize_keys.deep_merge((options[:mappings] || {}).symbolize_keys)
+        mappings = mappings.symbolize_keys.deep_merge((mappings_from_options || {}).symbolize_keys)
       end
 
       {
